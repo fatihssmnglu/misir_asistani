@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}Ana Sayfa{% endblock %}
+{% block content %}
+
+<div class="container mt-5 text-center">
+  <!-- 👋 Karşılama -->
+  <h2 class="fw-bold text-success mb-3">👋 Hoş geldin, {{ user.username }}!</h2>
+  <p class="lead text-muted mb-5">
+    Mısır Asistanı ile tarlalarını yönet, hastalık tahminleri al ve köyündeki gelişmelerden haberdar ol.
+  </p>
+
+  <!-- 🌾 Kartlar -->
+  <div class="row g-4 justify-content-center">
+    <!-- 🌾 Tarlalarım -->
+    <div class="col-lg-6 col-md-6">
+      <div class="card border-0 shadow-lg rounded-4 hover-scale h-100">
+        <div class="card-body py-5">
+          <div class="icon mb-3 text-success" style="font-size: 3rem;">🌾</div>
+          <h4 class="card-title fw-bold mb-3">Tarlalarım</h4>
+          <p class="card-text text-muted">
+            Tarlalarını görüntüle, haritada konumlarını incele veya yeni tarla ekle.
+          </p>
+          <a href="{% url 'field_list' %}" class="btn btn-success px-5 mt-3">Tarlalara Git</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🧠 Hastalık Tespiti -->
+    <div class="col-lg-6 col-md-6">
+      <div class="card border-0 shadow-lg rounded-4 hover-scale h-100">
+        <div class="card-body py-5">
+          <div class="icon mb-3 text-warning" style="font-size: 3rem;">🧠</div>
+          <h4 class="card-title fw-bold mb-3">Hastalık Tespiti</h4>
+          <p class="card-text text-muted">
+            Yaprak fotoğrafı yükle, yapay zekâdan analiz sonucu al.
+          </p>
+          <a href="{% url 'upload_and_predict' %}" class="btn btn-warning text-white px-5 mt-3">Tahmin Et</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⚠️ Uyarılar -->
+    <div class="col-lg-6 col-md-6">
+      <div class="card border-0 shadow-lg rounded-4 hover-scale h-100">
+        <div class="card-body py-5">
+          <div class="icon mb-3 text-danger" style="font-size: 3rem;">⚠️</div>
+          <h4 class="card-title fw-bold mb-3">Uyarılar</h4>
+          <p class="card-text text-muted">
+            Köyündeki son hastalık bildirimlerini görüntüle.
+          </p>
+          <a href="{% url 'alert_list' %}" class="btn btn-danger px-5 mt-3">Uyarıları Gör</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📢 Sosyal Akış -->
+    <div class="col-lg-6 col-md-6">
+      <div class="card border-0 shadow-lg rounded-4 hover-scale h-100">
+        <div class="card-body py-5">
+          <div class="icon mb-3 text-primary" style="font-size: 3rem;">📢</div>
+          <h4 class="card-title fw-bold mb-3">Sosyal Akış</h4>
+          <p class="card-text text-muted">
+            Diğer çiftçilerin paylaşımlarını gör, kendi gönderilerini oluştur.
+          </p>
+          <a href="{% url 'feed' %}" class="btn btn-outline-primary px-5 mt-3">Akışa Git</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 🎨 Stil -->
+<style>
+.hover-scale {
+  transition: all 0.3s ease;
+}
+.hover-scale:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.15);
+}
+.card-body .icon {
+  transition: transform 0.3s ease;
+}
+.card-body:hover .icon {
+  transform: rotate(4deg) scale(1.15);
+}
+.card {
+  border-radius: 20px;
+}
+</style>
+
+{% endblock %}

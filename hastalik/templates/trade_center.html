@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Ticaret Merkezi{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <h3 class="fw-bold text-success text-center mb-4">🌾 Tarımsal Ticaret Merkezi</h3>
+
+  <!-- Sekmeler -->
+  <ul class="nav nav-tabs justify-content-center" id="tradeTabs" role="tablist">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#listings" role="tab">🛒 İlanlar</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#offers" role="tab">💬 Tekliflerim</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#add" role="tab">➕ Yeni İlan Ekle</a></li>
+  </ul>
+
+  <div class="tab-content mt-4">
+    
+    <!-- 🛒 İLANLAR -->
+    <div class="tab-pane fade show active" id="listings" role="tabpanel">
+      <div class="row g-4">
+        {% for listing in listings %}
+        <div class="col-md-4">
+          <div class="card border-0 shadow-sm rounded-4 h-100">
+
+            <!-- Resim -->
+            {% if listing.image %}
+              <img src="{{ listing.image.url }}" class="card-img-top rounded-top-4" style="height:220px;object-fit:cover;">
+            {% else %}
+              <img src="https://via.placeholder.com/400x220?text={{ listing.get_product_display }}" class="card-img-top rounded-top-4">
+            {% endif %}
+
+            <div class="card-body">
+              <h5 class="fw-bold text-success">{{ listing.get_product_display }}</h5>
+              <p class="mb-1"><b>Tür:</b> {{ listing.get_listing_type_display }}</p>
+              <p class="mb-1"><b>Fiyat:</b> {{ listing.price }} ₺/ton</p>
+              <p class="mb-1"><b>Miktar:</b> {{ listing.quantity }} ton</p>
+
+{% if listing.user == user or listing.id in finalized_listing_ids %}
+  <p class="mb-1"><b>📞 Telefon:</b> {{ listing.phone_number }}</p>
+{% else %}
+  <p class="mb-1 text-muted">🔒 Telefon görünür: Anlaşma tamamlanınca</p>
+{% endif %}
+
+<p class="text-muted small">{{ listing.description|truncatechars:100 }}</p>
+
+            </div>
+
+            <div class="card-footer bg-white border-0 d-flex justify-content-between align-items-center">
+             
+<small class="text-muted">👤 {{ listing.user.username }}</small>
+
+{% if listing.user != user %}
+  <a href="{% url 'start_negotiation' listing.id %}" class="btn btn-outline-success">
+    💬 Pazarlık Yap
+  </a>
+{% else %}
+  <span class="badge bg-secondary">Senin ilan</span>
+{% endif %}
+
+
+
+            </div>
+
+            <div class="p-2">
+              <a href="https://wa.me/{{ listing.phone_number|cut:'+' }}" target="_blank" class="btn btn-outline-success btn-sm w-100">
+                📲 WhatsApp'tan Ulaş
+              </a>
+            </div>
+
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-muted text-center mt-4">Henüz ilan bulunmuyor.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- 💬 TEKLİFLER -->
+    <div class="tab-pane fade" id="offers" role="tabpanel">
+      <div class="row">
+        <div class="col-md-6">
+          <h5 class="text-success mb-3">Verdiğim Teklifler</h5>
+          <ul class="list-group shadow-sm">
+            {% for o in my_offers %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              {{ o.listing.get_product_display }} - {{ o.offered_price }}₺
+              <span class="badge bg-info">{{ o.get_listing_type_display }}</span>
+            </li>
+            {% empty %}
+            <p class="text-muted">Henüz teklif vermedin.</p>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="col-md-6">
+          <h5 class="text-success mb-3">Aldığım Teklifler</h5>
+          <ul class="list-group shadow-sm">
+            {% for o in received_offers %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              {{ o.offered_by.username }}: {{ o.offered_price }} ₺
+              {% if not o.is_accepted %}
+             <form method="post" action="{% url 'approve_offer' o.id %}">
+  {% csrf_token %}
+  <button class="btn btn-success btn-sm">Kabul Et</button>
+</form>
+
+
+              {% else %}
+              <span class="badge bg-success">Kabul Edildi</span>
+              {% endif %}
+            </li>
+            {% empty %}
+            <p class="text-muted">Henüz teklif almadın.</p>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ➕ YENİ İLAN -->
+    <div class="tab-pane fade" id="add" role="tabpanel">
+      <div class="card shadow-sm border-0 p-4">
+        <h5 class="text-success fw-semibold mb-3">Yeni İlan Oluştur</h5>
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">{{ form.product }}</div>
+            <div class="col-md-6">{{ form.listing_type }}</div>
+            <div class="col-md-4">{{ form.quantity }}</div>
+            <div class="col-md-4">{{ form.price }}</div>
+            <div class="col-md-4">{{ form.phone_number }}</div>
+            <div class="col-md-12">{{ form.image }}</div>
+            <div class="col-md-12">{{ form.description }}</div>
+          </div>
+          <button type="submit" class="btn btn-success mt-3 w-100">📢 İlanı Kaydet</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+{% endblock %}

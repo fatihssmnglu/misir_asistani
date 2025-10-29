@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% block title %}Köy Sohbeti{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <div class="text-center mb-4">
+    <h3 class="fw-bold text-success">💬 Köy Sohbeti</h3>
+    <p class="text-muted">Köyündeki çiftçilerle konuş, fotoğraf gönder, hava durumunu öğren.</p>
+  </div>
+
+  {% if villages %}
+  <div class="row g-4">
+    <!-- 🌾 Köy Listesi -->
+    <div class="col-md-3">
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-success text-white">🌾 Köylerim</div>
+        <ul class="list-group list-group-flush">
+          {% for v in villages %}
+          <li class="list-group-item {% if selected_village and selected_village.id == v.id %}active text-light{% endif %}">
+            <a href="?village_id={{ v.id }}" class="text-decoration-none {% if selected_village and selected_village.id == v.id %}text-light{% else %}text-dark{% endif %}">
+              {{ v.name }}
+            </a>
+            {% for vw in village_weather_list %}
+              {% if vw.id == v.id and vw.weather %}
+                <span class="badge bg-info text-dark float-end">
+                  {{ vw.weather.temp }}°C <br><small>{{ vw.weather.desc }}</small>
+                </span>
+              {% endif %}
+            {% endfor %}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- 💬 Sohbet Alanı -->
+    <div class="col-md-9">
+      {% if selected_village %}
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-success text-white">
+          {{ selected_village.name }} Köyü Sohbeti
+        </div>
+
+        <div id="chat-box" class="card-body bg-light" style="max-height: 420px; overflow-y: auto;">
+          {% for msg in messages %}
+          <div class="mb-3 {% if msg.sender == user %}text-end{% else %}text-start{% endif %}">
+            <small class="text-muted"><strong>{{ msg.sender.username }}</strong> · {{ msg.created_at|date:"H:i" }}</small><br>
+
+            {% if msg.text %}
+              <span class="badge bg-{% if msg.sender == user %}success{% else %}secondary{% endif %} px-3 py-2">{{ msg.text }}</span><br>
+            {% endif %}
+
+            {% if msg.image %}
+              <a href="{{ msg.image.url }}" target="_blank">
+                <img src="{{ msg.image.url }}" class="rounded mt-2 shadow-sm" style="max-width: 180px; border:2px solid #eee;">
+              </a>
+            {% endif %}
+          </div>
+          {% empty %}
+          <p class="text-muted text-center">Henüz mesaj yok.</p>
+          {% endfor %}
+        </div>
+
+        <!-- 📝 Mesaj Gönderme Alanı -->
+        <div class="card-footer bg-white border-0">
+          <form id="chat-form" method="POST" enctype="multipart/form-data" class="d-flex align-items-center">
+            {% csrf_token %}
+            <input type="hidden" name="village_id" value="{{ selected_village.id }}">
+            
+            <label for="chat-image" class="btn btn-outline-success me-2 mb-0" style="border-radius:50%;">
+              📷
+            </label>
+            <input type="file" name="image" id="chat-image" accept="image/*" hidden>
+
+            <input type="text" id="chat-message" name="message" class="form-control rounded-pill me-2" placeholder="Mesaj yaz..." style="border:1px solid #ccc;">
+            <button type="submit" class="btn btn-success rounded-pill px-4">Gönder</button>
+          </form>
+
+          <!-- 📸 Fotoğraf önizleme -->
+          <div id="image-preview" class="text-center mt-2" style="display:none;">
+            <img id="preview-img" src="" class="rounded shadow-sm" style="max-width:150px; border:2px solid #ddd;">
+            <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="removePreview()">Kaldır</button>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="alert alert-info text-center shadow-sm">📍 Soldan bir köy seçerek sohbete katılabilirsin.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% else %}
+  <div class="alert alert-warning text-center shadow-sm">
+    Henüz tarlası olan bir köyün yok. 🌱 Tarla ekleyerek köy sohbetine katılabilirsin.
+  </div>
+  {% endif %}
+</div>
+
+<!-- 🔁 JS -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const chatBox = document.getElementById("chat-box");
+  const chatForm = document.getElementById("chat-form");
+  const chatInput = document.getElementById("chat-message");
+  const chatImage = document.getElementById("chat-image");
+  const villageId = "{{ selected_village.id|default:'' }}";
+
+  // 🔁 Mesajları düzenli olarak yenile
+  function loadMessages() {
+    if (!villageId) return;
+    fetch(`/chat/get/${villageId}/`)
+      .then(res => res.json())
+      .then(data => {
+        chatBox.innerHTML = "";
+        data.messages.forEach(msg => {
+          const align = msg.sender === "{{ user.username }}" ? "text-end" : "text-start";
+          const color = msg.sender === "{{ user.username }}" ? "success" : "secondary";
+
+          const msgDiv = document.createElement("div");
+          msgDiv.className = `mb-3 ${align}`;
+          msgDiv.innerHTML = `
+            <div><small class="text-muted"><strong>${msg.sender}</strong> · ${msg.created_at}</small></div>
+            ${msg.text ? `<span class="badge bg-${color} px-3 py-2">${msg.text}</span>` : ""}
+            ${msg.image ? `<br><a href="${msg.image}" target="_blank"><img src="${msg.image}" class="rounded mt-2 shadow-sm" style="max-width: 180px; border:2px solid #eee;"></a>` : ""}
+          `;
+          chatBox.appendChild(msgDiv);
+        });
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+  }
+
+  // 📨 Mesaj + Fotoğraf Gönderme
+  chatForm.addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const formData = new FormData(chatForm); // 🔥 hem metin hem dosya taşır
+    fetch("{% url 'village_chat' %}?village_id={{ selected_village.id }}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}"
+      },
+      body: formData
+    }).then(() => {
+      chatInput.value = "";
+      chatImage.value = "";
+      document.getElementById("image-preview").style.display = "none";
+      loadMessages(); // 🟢 anında yenile
+    });
+  });
+
+  // 📸 Önizleme
+  chatImage.addEventListener("change", function() {
+    const preview = document.getElementById("image-preview");
+    const imgTag = document.getElementById("preview-img");
+    const file = this.files[0];
+    if (file) {
+      imgTag.src = URL.createObjectURL(file);
+      preview.style.display = "block";
+    }
+  });
+
+  window.removePreview = function() {
+    chatImage.value = "";
+    document.getElementById("image-preview").style.display = "none";
+  };
+
+  // ⏳ 4 saniyede bir yenile
+  setInterval(loadMessages, 4000);
+  loadMessages();
+});
+</script>
+
+
+{% endblock %}

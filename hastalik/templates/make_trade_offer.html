@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h3>💰 {{ listing.product }} için Teklif Ver</h3>
+  <form method="POST">
+    {% csrf_token %}
+    <label>Teklif Fiyatı (₺/ton):</label>
+    <input type="number" step="0.01" name="offered_price" class="form-control" required>
+    <label>Miktar (ton):</label>
+    <input type="number" step="0.01" name="quantity" class="form-control" required>
+    <label>Mesaj:</label>
+    <textarea name="message" class="form-control"></textarea>
+    <button type="submit" class="btn btn-success mt-3">Gönder</button>
+  </form>
+</div>
+{% endblock %}

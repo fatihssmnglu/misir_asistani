@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Tarlalarım{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+      <h3>🌽 Tarlalarım</h3>
+      <a href="{% url 'add_field' %}" class="btn btn-success">+ Yeni Tarla Ekle</a>
+  </div>
+
+  {% if fields %}
+      <!-- 🗺️ Harita alanı -->
+      <div class="card p-3 shadow-sm mb-4">
+          <div id="map"></div>
+      </div>
+
+      <!-- 📋 Tarla Tablosu -->
+      <div class="card shadow-sm p-3">
+          <h5 class="text-success mb-3">📍 Tarlalar Listesi</h5>
+          <table class="table table-striped align-middle">
+              <thead class="table-success">
+                  <tr>
+                      <th>Ad</th>
+                      <th>Ürün Türü</th>
+                      <th>Alan (dönüm)</th>
+                      <th>Toprak Türü</th>
+                      <th>Sulama Türü</th>
+                      <th>Konum</th>
+                      <th>Geçmiş</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for field in fields %}
+                  <tr>
+                      <td>{{ field.name }}</td>
+                      <td>{{ field.crop_type }}</td>
+                      <td>{{ field.area_size }}</td>
+                      <td>{{ field.soil_type }}</td>
+                      <td>{{ field.irrigation_type }}</td>
+                      <td>
+                          {% if field.lat and field.lon %}
+                              {{ field.lat|floatformat:4 }}, {{ field.lon|floatformat:4 }}
+                          {% else %}
+                              -
+                          {% endif %}
+                      </td>
+                      <td>
+                          <a href="{% url 'field_history' field.id %}" class="btn btn-success">📜 Geçmişi Gör</a>
+                           <a href="{% url 'delete_field' field.id %}" class="btn btn-sm btn-danger">Sil</a>
+
+                      </td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+      </div>
+  {% else %}
+      <div class="alert alert-warning text-center shadow-sm">
+          Henüz tarla eklemediniz. <br>
+          <a href="{% url 'add_field' %}" class="btn btn-sm btn-success mt-2">+ Tarla Ekle</a>
+      </div>
+  {% endif %}
+</div>
+
+<!-- 🗺️ Harita Kodları -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+ // 🗺️ Harita Ayarları (Google Uydu)
+const map = L.map('map').setView([39.0, 35.0], 6);
+L.tileLayer('https://mt1.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+  maxZoom: 20,
+  attribution: '&copy; <a href="https://www.google.com/maps">Google Maps</a> katkıda bulunanlar'
+}).addTo(map);
+
+
+  const fields = JSON.parse('{{ fields_json|escapejs }}');
+
+  fields.forEach(f => {
+      if (f.lat && f.lon) {
+          const marker = L.marker([f.lat, f.lon]).addTo(map);
+          marker.bindPopup(`<b>${f.name}</b><br>${f.crop_type || 'Ürün Bilgisi Yok'}`);
+      }
+  });
+
+  setTimeout(() => map.invalidateSize(), 800);
+});
+</script>
+
+<style>
+#map {
+  height: 420px;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+</style>
+
+{% endblock %}

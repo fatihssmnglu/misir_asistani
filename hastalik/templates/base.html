@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Mısır Asistanı{% endblock %}</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- 🌿 Ortak Stil -->
+  <style>
+    body {
+      background: linear-gradient(135deg, #f1f8e9, #e8f5e9);
+      font-family: 'Segoe UI', sans-serif;
+      color: #2e7d32;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 🔹 Navbar */
+    .navbar {
+      background-color: #388e3c;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: background 0.3s;
+    }
+
+    .navbar-brand {
+      color: white !important;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* 🌽 Logo stili */
+    .navbar-brand img {
+      width: 64px;
+      height: 64px;
+
+      object-fit: cover;
+      border-radius: 50%; /* ✅ Köşeleri tamamen yuvarlak */
+      background: #ffffff1a; /* hafif saydam beyaz çerçeve */
+      padding: 4px;
+      box-shadow: 0 0 6px rgba(255,255,255,0.3);
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .navbar-brand img:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 12px rgba(255,255,255,0.6);
+    }
+
+    .nav-link {
+      color: #e8f5e9 !important;
+      font-weight: 500;
+      margin-left: 8px;
+      transition: 0.2s;
+    }
+
+    .nav-link:hover {
+      color: #c8e6c9 !important;
+      transform: scale(1.05);
+    }
+
+    .container-content {
+      flex: 1;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    footer {
+      background-color: #2e7d32;
+      color: white;
+      text-align: center;
+      padding: 12px 0;
+      font-size: 0.9rem;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🌽 Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+    <div class="container">
+      <!-- Logo + Yazı -->
+      <a class="navbar-brand" href="{% url 'home' %}">
+        <img src="{% static 'img/corn_logo.png' %}" alt="Logo">
+        <span class="fs-4">Mısır Asistanı</span>
+      </a>
+
+      <!-- Menü Butonu (Mobilde) -->
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <!-- Menü Linkleri -->
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          {% if user.is_authenticated %}
+            <li class="nav-item"><a href="{% url 'field_list' %}" class="nav-link">🌾 Tarlalar</a></li>
+            <li class="nav-item"><a href="{% url 'upload_and_predict' %}" class="nav-link">🧠 Tahmin</a></li>
+            <li class="nav-item"><a href="{% url 'alert_list' %}" class="nav-link">⚠️ Uyarılar</a></li>
+            <li class="nav-item"><a href="{% url 'village_chat' %}" class="nav-link">💬 Sohbet</a></li>
+            <li class="nav-item"><a href="{% url 'feed' %}" class="nav-link">📢 Akış</a></li>
+            <li class="nav-item">
+
+
+</li>
+
+            <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link">🚪 Çıkış</a></li>
+          {% else %}
+            <li class="nav-item"><a href="{% url 'login' %}" class="nav-link">🔑 Giriş Yap</a></li>
+            <li class="nav-item"><a href="{% url 'register' %}" class="nav-link">📝 Kayıt Ol</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 🧩 Sayfa İçeriği -->
+  <div class="container-content">
+    {% block content %}{% endblock %}
+  </div>
+
+  <!-- 🌱 Footer -->
+  <footer>
+    © 2025 Mısır Asistanı – Tarla Sağlığı ve Köy Dayanışma Platformu 🌾
+  </footer>
+
+</body>
+</html>

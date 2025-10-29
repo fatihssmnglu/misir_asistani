@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Köy Uyarıları{% endblock %}
+{% block content %}
+<div class="card-custom w-100" style="max-width: 800px;">
+  <h4 class="text-center mb-4">📢 Köyündeki Uyarılar</h4>
+
+  {% if alerts %}
+    {% for alert in alerts %}
+      <div class="alert alert-warning shadow-sm mb-3">
+        <h5 class="mb-1 text-dark">{{ alert.title }}</h5>
+        <p class="mb-1">{{ alert.message }}</p>
+        <small class="text-muted">⏱ {{ alert.created_at|date:"d M Y H:i" }}</small>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="alert alert-success text-center">
+      ✅ Şu anda köyünde aktif bir uyarı bulunmamaktadır.
+    </div>
+  {% endif %}
+
+  <div class="d-flex justify-content-center gap-2 mt-3">
+    <a href="{% url 'create_alert' %}" class="btn btn-success">
+      ➕ Yeni Uyarı Ekle
+    </a>
+    <a href="{% url 'home' %}" class="btn btn-primary">
+      🏠 Ana Sayfa
+    </a>
+  </div>
+</div>
+{% endblock %}

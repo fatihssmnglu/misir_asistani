@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Sosyal Akış{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <h3 class="fw-bold text-success mb-3 text-center">📢 Sosyal Akış</h3>
+
+  <!-- 🔹 Sekme Butonları -->
+  <div class="text-center mb-4">
+    <button id="tab-all" class="btn btn-success me-2 active" onclick="switchTab('all')">🌍 Tüm Gönderiler</button>
+    <button id="tab-mine" class="btn btn-outline-success" onclick="switchTab('mine')">👤 Benim Gönderilerim</button>
+  </div>
+
+  <!-- 🔍 Kategori Filtreleme -->
+  <div class="text-center mb-4">
+    <form method="GET" action="{% url 'feed' %}" class="d-inline">
+      <select name="category" class="form-select d-inline w-auto" onchange="this.form.submit()">
+        <option value="">🏷️ Tüm Kategoriler</option>
+        <option value="misir" {% if selected_category == 'misir' %}selected{% endif %}>🌽 Mısır</option>
+        <option value="bugday" {% if selected_category == 'bugday' %}selected{% endif %}>🌾 Buğday</option>
+        <option value="mercimek" {% if selected_category == 'mercimek' %}selected{% endif %}>🌱 Mercimek</option>
+        <option value="sebze" {% if selected_category == 'sebze' %}selected{% endif %}>🥕 Sebze</option>
+        <option value="hayvancilik" {% if selected_category == 'hayvancilik' %}selected{% endif %}>🐄 Hayvancılık</option>
+        <option value="genel" {% if selected_category == 'genel' %}selected{% endif %}>🗣️ Genel</option>
+      </select>
+    </form>
+  </div>
+
+  <!-- 📤 Yeni Gönderi Paylaş -->
+  <div class="card shadow-sm border-0 mb-4 mx-auto" style="max-width: 700px;">
+    <div class="card-body">
+      <form action="{% url 'create_post' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="d-flex align-items-center mb-3">
+          <img src="{% static 'img/corn_logo.png' %}" 
+               class="rounded-circle me-3 border border-success" 
+               width="50" height="50" 
+               style="background-color:#fff; padding:5px;">
+          <input type="text" name="title" class="form-control me-2" 
+                 placeholder="Başlık (isteğe bağlı)">
+          <input type="file" name="image" accept="image/*" 
+                 class="form-control form-control-sm me-2" style="max-width: 200px;">
+          <button type="submit" class="btn btn-success px-4">Paylaş</button>
+        </div>
+
+        <!-- 🌽 Kategori Seçimi -->
+        <div class="mb-2">
+          <label class="fw-bold text-success small">🏷️ Kategori:</label>
+          <select name="category" class="form-select">
+            <option value="genel" selected>🗣️ Genel</option>
+            <option value="misir">🌽 Mısır</option>
+            <option value="bugday">🌾 Buğday</option>
+            <option value="mercimek">🌱 Mercimek</option>
+            <option value="sebze">🥕 Sebze</option>
+            <option value="hayvancilik">🐄 Hayvancılık</option>
+          </select>
+        </div>
+
+        <textarea name="description" class="form-control mt-3" rows="3" 
+                  placeholder="Ne düşünüyorsun? 🌾"></textarea>
+      </form>
+    </div>
+  </div>
+
+  <!-- 🌍 Tüm Gönderiler -->
+  <div id="posts-all">
+    {% for post in posts %}
+      <div class="card shadow-sm mb-4 border-0 mx-auto" style="max-width: 700px;">
+        {% if post.image %}
+          <img src="{{ post.image.url }}" class="card-img-top" style="max-height: 400px; object-fit: cover;">
+        {% endif %}
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-2">
+            <img src="{% static 'img/corn_logo.png' %}" 
+                 class="rounded-circle me-2 border border-success" 
+                 width="38" height="38" 
+                 style="background-color:#fff; padding:4px;">
+            <strong>{{ post.owner.username }}</strong>
+          </div>
+
+          <p class="card-text">{{ post.description }}</p>
+
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <button class="btn btn-link text-danger p-0 like-btn" data-id="{{ post.id }}">
+                ❤️ <span>{{ post.likes.count }}</span>
+              </button>
+              <button class="btn btn-link text-muted p-0" onclick="toggleComments('{{ post.id }}')">💬</button>
+            </div>
+            <small class="text-muted">{{ post.created_at|date:"d M Y H:i" }}</small>
+          </div>
+
+          <div id="comments-{{ post.id }}" class="mt-2" style="display:none;">
+            {% for comment in post.comments.all %}
+              <div class="d-flex mb-2 align-items-center">
+                <img src="{% static 'img/corn_logo.png' %}" 
+                     class="rounded-circle me-2 border border-success" 
+                     width="30" height="30" 
+                     style="background-color:#fff; padding:3px;">
+                <div class="comment-bubble">
+                  <b>{{ comment.user.username }}</b> {{ comment.text }}
+                </div>
+              </div>
+            {% empty %}
+              <p class="text-muted small">Henüz yorum yok.</p>
+            {% endfor %}
+            <form class="comment-form mt-2" data-id="{{ post.id }}">
+              <input type="text" name="text" class="form-control" placeholder="Yorum yaz...">
+            </form>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="alert alert-info text-center">Henüz hiç gönderi yok.</div>
+    {% endfor %}
+  </div>
+
+  <!-- 👤 Benim Gönderilerim -->
+  <div id="posts-mine" style="display:none;">
+    {% for post in my_posts %}
+      <div class="card shadow-sm mb-4 border-0 mx-auto" style="max-width: 700px;">
+        {% if post.image %}
+          <img src="{{ post.image.url }}" class="card-img-top" style="max-height: 400px; object-fit: cover;">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ post.title }}</h5>
+          <p class="card-text text-muted">{{ post.description }}</p>
+          <p class="text-muted small mb-1">🏷️ Kategori: {{ post.get_category_display }}</p>
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-secondary">📅 {{ post.created_at|date:"d M Y H:i" }}</small>
+            <form action="{% url 'delete_post' post.id %}" method="POST" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Sil</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="alert alert-warning text-center">Henüz kendi gönderin yok.</div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- 🎨 Stil -->
+<style>
+.comment-bubble {
+  background: #f1f3f4;
+  padding: 8px 12px;
+  border-radius: 18px;
+  display: inline-block;
+}
+.btn.active, .btn:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.card {
+  border-radius: 15px;
+}
+.form-control, .form-select {
+  border-radius: 10px;
+}
+textarea {
+  resize: none;
+}
+.rounded-circle {
+  background-color: #fff;
+  border: 2px solid #4caf50;
+}
+</style>
+
+<!-- ⚙️ JS -->
+<script>
+function switchTab(tab) {
+  const allTab = document.getElementById('posts-all');
+  const myTab = document.getElementById('posts-mine');
+  const btnAll = document.getElementById('tab-all');
+  const btnMine = document.getElementById('tab-mine');
+
+  if (tab === 'mine') {
+    allTab.style.display = 'none';
+    myTab.style.display = 'block';
+    btnMine.classList.add('btn-success');
+    btnMine.classList.remove('btn-outline-success');
+    btnAll.classList.remove('btn-success');
+    btnAll.classList.add('btn-outline-success');
+  } else {
+    allTab.style.display = 'block';
+    myTab.style.display = 'none';
+    btnAll.classList.add('btn-success');
+    btnAll.classList.remove('btn-outline-success');
+    btnMine.classList.remove('btn-success');
+    btnMine.classList.add('btn-outline-success');
+  }
+}
+
+function toggleComments(postId) {
+  const el = document.getElementById('comments-' + postId);
+  el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+}
+
+document.querySelectorAll('.like-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const postId = btn.dataset.id;
+    const res = await fetch("{% url 'like_post' %}", {
+      method: "POST",
+      headers: {"X-CSRFToken": "{{ csrf_token }}"},
+      body: new URLSearchParams({post_id: postId})
+    });
+    const data = await res.json();
+    btn.querySelector('span').innerText = data.total_likes;
+  });
+});
+
+document.querySelectorAll('.comment-form').forEach(form => {
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const textInput = form.querySelector('input[name="text"]');
+    const postId = form.dataset.id;
+    const text = textInput.value.trim();
+    if (!text) return;
+    const res = await fetch("{% url 'add_comment' %}", {
+      method: "POST",
+      headers: {"X-CSRFToken": "{{ csrf_token }}"},
+      body: new URLSearchParams({post_id: postId, text})
+    });
+    const data = await res.json();
+    const commentBox = form.parentElement;
+    const div = document.createElement("div");
+    div.classList.add("d-flex", "mb-2", "align-items-center");
+    div.innerHTML = `<img src="{% static 'img/corn_logo.png' %}" class="rounded-circle me-2 border border-success" width="30" height="30" style="background-color:#fff; padding:3px;">
+                     <div class="comment-bubble"><b>${data.username}</b> ${data.text}</div>`;
+    commentBox.insertBefore(div, form);
+    textInput.value = "";
+  });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Benim Gönderilerim{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h3 class="fw-bold text-success mb-3 text-center">👤 Benim Gönderilerim</h3>
+
+  <!-- 🔙 Geri dön -->
+  <div class="text-center mb-4">
+    <a href="{% url 'feed' %}" class="btn btn-outline-success">⬅️ Tüm Gönderiler</a>
+  </div>
+
+  {% for post in my_posts %}
+    <div class="card shadow-sm mb-4 border-0">
+      {% if post.image %}
+        <img src="{{ post.image.url }}" class="card-img-top" style="max-height: 400px; object-fit: cover;">
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ post.title }}</h5>
+        <p class="card-text text-muted">{{ post.description }}</p>
+        <div class="d-flex justify-content-between align-items-center">
+          <small class="text-secondary">📅 {{ post.created_at|date:"d M Y H:i" }}</small>
+          <form action="{% url 'delete_post' post.id %}" method="POST" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger btn-sm">🗑️ Sil</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="alert alert-warning text-center">Henüz kendi gönderin yok.</div>
+  {% endfor %}
+</div>
+{% endblock %}

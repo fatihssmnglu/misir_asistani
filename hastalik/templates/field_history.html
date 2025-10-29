@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}{{ field.name }} Hastalık Geçmişi{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+  <h3 class="fw-bold text-success">🕓 {{ field.name }} Tarlasının Hastalık Geçmişi</h3>
+  <hr>
+
+  {% if history %}
+    <table class="table table-bordered table-striped align-middle">
+      <thead class="table-success text-center">
+        <tr>
+          <th>Tarih</th>
+          <th>Hastalık</th>
+          <th>Öneri</th>
+          <th>Tespit Eden</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in history %}
+        <tr>
+          <td>{{ h.created_at|date:"d.m.Y H:i" }}</td>
+          <td class="fw-bold text-danger">{{ h.disease_name }}</td>
+          <td>{{ h.suggestion }}</td>
+          <td>{{ h.detected_by.username }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- 💊 Öneri Al Butonu -->
+    <div class="text-center mt-4">
+      <button class="btn btn-success px-4" data-bs-toggle="modal" data-bs-target="#adviceModal">
+        💊 Bu Tarlaya Öneri Al
+      </button>
+    </div>
+
+  {% else %}
+    <div class="alert alert-info text-center mt-4">
+      📄 Bu tarlada henüz hastalık geçmişi bulunmamaktadır.
+    </div>
+  {% endif %}
+
+  <div class="text-center mt-3">
+    <a href="{% url 'field_list' %}" class="btn btn-secondary">🔙 Tarlalara Dön</a>
+  </div>
+</div>
+
+<!-- 💬 Modal Penceresi (İlaç Önerisi) -->
+<div class="modal fade" id="adviceModal" tabindex="-1" aria-labelledby="adviceModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-success shadow">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="adviceModalLabel">💊 Tarla İçin İlaç Önerisi</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+      </div>
+      <div class="modal-body">
+        {% if advice %}
+          <p><b>🌾 Son Tespit Edilen Hastalık:</b> <span class="text-danger">{{ advice.title }}</span></p>
+          <hr>
+          <p><b>🧴 İlaç / Gübre Önerisi:</b> {{ advice.advice }}</p>
+          <p><b>💡 Not:</b> {{ advice.note }}</p>
+        {% else %}
+          <p>📄 Henüz hastalık geçmişi bulunamadığı için öneri oluşturulamadı.</p>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Kapat</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 🎨 Stil -->
+<style>
+.modal-content {
+  border-radius: 15px;
+}
+.modal-body p {
+  margin-bottom: 8px;
+}
+.table {
+  border-radius: 10px;
+  overflow: hidden;
+}
+</style>
+
+{% endblock %}

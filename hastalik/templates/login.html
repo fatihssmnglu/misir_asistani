@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Giriş Yap{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+  <div class="card border-0 shadow-lg p-4" style="max-width: 420px; width: 100%; border-radius: 20px;">
+    <div class="text-center mb-4">
+      <h3 class="fw-bold text-success mb-1">🌽 Mısır Asistanı</h3>
+      <p class="text-muted small">Tarlalarına ulaşmak için giriş yap</p>
+    </div>
+
+    <form method="POST">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label fw-semibold">👤 Kullanıcı Adı</label>
+        <input type="text" name="username" class="form-control rounded-3" placeholder="Kullanıcı adınızı girin" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">🔑 Şifre</label>
+        <input type="password" name="password" class="form-control rounded-3" placeholder="Şifrenizi girin" required>
+      </div>
+
+      <button class="btn btn-success w-100 py-2 rounded-3 fw-semibold">Giriş Yap</button>
+    </form>
+
+    {% if messages %}
+      <div class="mt-3">
+        {% for message in messages %}
+          <div class="alert alert-danger py-2 text-center mb-2">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="text-center mt-3">
+      <p class="small text-muted">
+        Hesabın yok mu? 
+        <a href="{% url 'register' %}" class="fw-semibold text-success text-decoration-none">Kayıt Ol</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .card {
+    animation: fadeIn 0.8s ease;
+  }
+  @keyframes fadeIn {
+    from {opacity: 0; transform: translateY(15px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+  input:focus {
+    border-color: #198754 !important;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+  }
+</style>
+{% endblock %}

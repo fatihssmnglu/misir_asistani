@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}E-posta Doğrulama{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height:80vh;">
+  <div class="card shadow p-4" style="max-width:450px;border-radius:20px;">
+    <h4 class="text-center text-success mb-3">📧 E-posta Doğrulama</h4>
+    <p class="text-center">Kodu <strong>{{ profile.user.email }}</strong> adresine gönderdik.</p>
+
+    {% for m in messages %}
+      <div class="alert alert-{{ m.tags }} py-2">{{ m }}</div>
+    {% endfor %}
+
+    <form method="POST">
+      {% csrf_token %}
+      <input type="text" name="code" maxlength="6" class="form-control mb-3 text-center" placeholder="6 haneli kod" required>
+      <button class="btn btn-success w-100">Doğrula</button>
+    </form>
+
+    <p class="text-center mt-3 small text-muted">
+      Kod gelmedi mi? <a href="{% url 'resend_email' profile.user.id %}">Tekrar gönder</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

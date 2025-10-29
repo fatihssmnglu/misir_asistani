@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Kayıt Ol - Mısır Asistanı{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-center align-items-center" style="min-height: 85vh;">
+  <div class="card border-0 shadow-lg p-4" style="max-width: 450px; width: 100%; border-radius: 20px;">
+    <div class="text-center mb-4">
+      <h3 class="fw-bold text-success">🌿 Kayıt Ol</h3>
+      <p class="text-muted small">Hesabını oluştur, tarlalarını yönetmeye başla!</p>
+    </div>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show py-2">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="POST" autocomplete="off">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label fw-semibold">👤 Kullanıcı Adı</label>
+        <input type="text" name="username" class="form-control rounded-3" placeholder="Kullanıcı adınızı girin" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">📧 Email</label>
+        <input type="email" name="email" class="form-control rounded-3" placeholder="E-posta adresinizi girin" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">🔒 Şifre</label>
+        <input type="password" name="password" class="form-control rounded-3" placeholder="Şifrenizi girin" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">🔁 Şifre Tekrar</label>
+        <input type="password" name="password2" class="form-control rounded-3" placeholder="Şifrenizi tekrar girin" required>
+      </div>
+
+      <button type="submit" class="btn btn-success w-100 py-2 fw-semibold rounded-3">Kayıt Ol</button>
+    </form>
+
+    <div class="text-center mt-3">
+      <p class="small text-muted">
+        Zaten hesabın var mı?
+        <a href="{% url 'login' %}" class="fw-semibold text-success text-decoration-none">Giriş Yap</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .card {
+    animation: fadeIn 0.8s ease;
+  }
+  @keyframes fadeIn {
+    from {opacity: 0; transform: translateY(15px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+  input:focus {
+    border-color: #198754 !important;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+  }
+</style>
+
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Mısır Hastalık Tahmini{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-center align-items-center" style="min-height:85vh;">
+  <div class="card border-0 shadow-lg p-4" style="max-width: 550px; width: 100%; border-radius: 20px;">
+    
+    <div class="text-center mb-4">
+      <h2 class="fw-bold text-success mb-1">🌽 Mısır Yaprak Hastalığı Tahmini</h2>
+      <p class="text-muted small">Tarlandan çektiğin yaprak fotoğrafını yükle, yapay zekâ analiz etsin.</p>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">🌾 Tarlanı Seç</label>
+        <select name="field_id" class="form-select rounded-3" required>
+          <option value="">-- Tarla Seç --</option>
+          {% for field in user.fields.all %}
+            <option value="{{ field.id }}">{{ field.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">📸 Fotoğraf Yükle</label>
+        <input type="file" name="image" class="form-control rounded-3" accept="image/*" required>
+      </div>
+
+      <div class="text-center mt-3">
+        <button type="submit" class="btn btn-success px-4 py-2 fw-semibold rounded-5 shadow-sm">
+          🔍 Analiz Et
+        </button>
+      </div>
+    </form>
+
+    {% if result %}
+      <div class="alert alert-success text-center mt-4 rounded-4 shadow-sm p-4 animate-result">
+        <h3 class="fw-bold mb-2">🧠 Tahmin Sonucu:</h3>
+        <h4 class="text-success fw-bold mb-2">{{ result }}</h4>
+        <p class="text-muted mb-0">{{ suggestion }}</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  body {
+    background: linear-gradient(135deg, #f0fff0, #d2ffd2);
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .animate-result {
+    animation: fadeInScale 0.7s ease;
+  }
+  @keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  input:focus, select:focus {
+    border-color: #198754 !important;
+    box-shadow: 0 0 0 0.2rem rgba(25,135,84,0.25);
+  }
+</style>
+
+{% endblock %}
